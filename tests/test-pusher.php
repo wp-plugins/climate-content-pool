@@ -14,7 +14,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'title',
 			$post->post_title );
 	}
@@ -28,7 +28,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'text',
 			$post->post_content );
 	}
@@ -40,7 +40,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'locale',
 			'en' );
 	}
@@ -56,7 +56,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'locale',
 			'es' );
 	}
@@ -71,7 +71,7 @@ class PusherTest extends ContentPoolTestBase {
 		$post = $this->get_new_post();
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'internal',
 			false );
 	}
@@ -86,7 +86,7 @@ class PusherTest extends ContentPoolTestBase {
 		$post = $this->get_new_post();
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'internal',
 			true );
 	}
@@ -102,7 +102,7 @@ class PusherTest extends ContentPoolTestBase {
 		$post = $this->get_new_post();
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'documentUrl',
 			$url );
 	}
@@ -120,7 +120,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'text',
 			'A NEW WORLD BANK REPORT LAYS OUT THREE STEPS FOR A SMOOTH TRANSITION TO A ZERO-CARBON FUTURE.' );
 	}
@@ -136,7 +136,17 @@ class PusherTest extends ContentPoolTestBase {
 
 		$error = $pusher->push( $post );
 
-		$this->assertThat( $error, $this->equalTo( 'An error occurred<br />A very serious error' ) );
+		$messages = $error->get_error_messages();
+
+		$this->assertThat(
+			$messages,
+			$this->equalTo(
+				array(
+					'An error occurred',
+					'A very serious error',
+				)
+			)
+		);
 	}
 
 	public function test_response_error_handled() {
@@ -153,7 +163,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$this->assertThat(
 			$pusher->push( $post ),
-			$this->equalTo( 'An error occurred<br />A very serious error' ) );
+			$this->equalTo( $error ) );
 	}
 
 	public function test_error_handled_for_non_200_status_code() {
@@ -169,9 +179,14 @@ class PusherTest extends ContentPoolTestBase {
 			)
 		);
 
+		$expected_error = new WP_Error(
+			'apierror',
+			'Invalid API Key'
+		);
+
 		$this->assertThat(
 			$pusher->push( $post ),
-			$this->equalTo( 'Invalid API Key' ) );
+			$this->equalTo( $expected_error ) );
 	}
 
 	public function test_invalid_document_id_handled() {
@@ -187,9 +202,14 @@ class PusherTest extends ContentPoolTestBase {
 			)
 		);
 
+		$expected_error = new WP_Error(
+			'noid',
+			'Failed to retrieve Content Pool document id'
+		);
+
 		$this->assertThat(
 			$pusher->push( $post ),
-			$this->equalTo( 'Failed to retrieve Content Pool document id' ) );
+			$this->equalTo( $expected_error ) );
 	}
 
 	public function test_successful_push() {
@@ -207,7 +227,7 @@ class PusherTest extends ContentPoolTestBase {
 
 		$this->assertThat(
 			$pusher->push( $post ),
-			$this->identicalTo( false ) );
+			$this->identicalTo( true ) );
 	}
 
 	public function return_error() {
@@ -244,7 +264,7 @@ class PusherTest extends ContentPoolTestBase {
 		$post = $this->get_new_post();
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'token',
 			$token );
 	}
@@ -260,7 +280,7 @@ class PusherTest extends ContentPoolTestBase {
 		) );
 		$pusher->push( $post );
 
-		$this->check_api_field(
+		$this->check_api_request_field(
 			'date',
 			'2010-10-04T12:14:32+0000' );
 
@@ -270,7 +290,7 @@ class PusherTest extends ContentPoolTestBase {
 			$this->equalTo( 123456 ));
 	}
 
-	private function check_api_field( $name, $expected_value ) {
+	private function check_api_request_field( $name, $expected_value ) {
 		global $_CONTENT_POOL_MOCK_POST;
 
 		$actual_value = $_CONTENT_POOL_MOCK_POST[ $name ];

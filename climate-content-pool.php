@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Climate Content Pool
-Description: Pushes posts into the reegle Content Pool
-Version: 1.0.0
+Description: Pushes posts into the Climate Tagger Content Pool
+Version: 1.0.1
 Author: Aptivate
 */
 
@@ -95,7 +95,7 @@ class ClimateContentPool {
 			'<input type="text" id="climate-content-pool-token" name="climate_content_pool_general_settings[token]" value="%s" size="50" />',
 			esc_attr( $options['token'] )
 		);
-		echo '<br /><span class="description">A valid authentication token that has been generated in the reegle API dashboard. <a href="http://api.reegle.info/register/" target="_blank">http://api.reegle.info/register</a></span>';
+		echo '<br /><span class="description">A valid authentication token that has been generated in the Climate Tagger API dashboard. <a href="http://api.climatetagger.net/register/" target="_blank">http://api.climatetagger.net/register</a></span>';
 		?>
 		</td>
 		</tr>
@@ -151,8 +151,10 @@ class ClimateContentPool {
 	}
 
 	private function get_message( $error ) {
-		if ( $error !== false ) {
-			return "<div class='error'>$error</div>";
+		if ( $error instanceof WP_Error ) {
+			$message = implode( '<br />', $error->get_error_messages() );
+
+			return "<div class='error'>$message</div>";
 		}
 
 		return "<div class='updated'>Post successfully sent to Content Pool</div>";
@@ -166,7 +168,7 @@ class ClimateContentPool {
 		if ( $push_post && $this->is_post_type_supported( $post_type ) ) {
 			add_meta_box(
 				'climate_content_pool',
-				'Climate Content Pool',
+				'Climate Tagger Content Pool',
 				array( $this, 'render_meta_box_content' ),
 				$post_type,
 				'advanced',
@@ -184,7 +186,7 @@ class ClimateContentPool {
 	}
 
 	function render_meta_box_content() {
-		echo '<label for="id_push_to_content_pool">Send to reegle content pool: <input type="checkbox" id="id_push_to_content_pool" name="push_to_content_pool" checked="checked" /></label>';
+		echo '<label for="id_push_to_content_pool">Send to Climate Tagger Content Pool: <input type="checkbox" id="id_push_to_content_pool" name="push_to_content_pool" checked="checked" /></label>';
 	}
 }
 
